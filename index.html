@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Смена картинок</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    img {
+      display: block;
+      margin: 20px auto;
+    }
+    input {
+      width: 80px;
+      text-align: center;
+    }
+    button {
+      margin: 5px;
+      padding: 5px 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Смена картинок</h2>
+  
+  <img id="image" src="https://i.pinimg.com/736x/9a/77/fe/9a77feb5a99b6111f50f60f2021501a8.jpg" alt="Картинка">
+  
+  <div>
+    <label>Скорость (мс): </label>
+    <input type="number" id="speed" value="1000">
+  </div>
+  
+  <div>
+    <button onclick="start()">Старт</button>
+    <button onclick="stop()">Стоп</button>
+  </div>
+
+  <script>
+    const images = [
+      "https://i.pinimg.com/736x/9a/77/fe/9a77feb5a99b6111f50f60f2021501a8.jpg",
+      "https://i.pinimg.com/736x/0b/c6/23/0bc6236b9df078f9c9b896b681857e0e.jpg"
+    ];
+    
+    let index = 0;
+    let intervalId = null;
+
+    function start() {
+      stop();
+      const speed = document.getElementById("speed").value;
+      intervalId = setInterval(() => {
+        index = (index + 1) % images.length;
+        document.getElementById("image").src = images[index];
+      }, speed);
+    }
+
+    function stop() {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }
+  </script>
+
+</body>
+</html>
