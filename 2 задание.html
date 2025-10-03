@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка прямоугольника</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: white;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Настройка прямоугольника</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="x">Координата X:</label>
+                <input type="number" id="x" value="50" min="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="y">Координата Y:</label>
+                <input type="number" id="y" value="50" min="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="width">Ширина:</label>
+                <input type="number" id="width" value="100" min="1">
+            </div>
+            
+            <div class="control-group">
+                <label for="height">Высота:</label>
+                <input type="number" id="height" value="80" min="1">
+            </div>
+            
+            <div class="control-group">
+                <label for="color">Цвет заливки:</label>
+                <input type="color" id="color" value="#3498db">
+            </div>
+        </div>
+        
+        <canvas id="canvas" width="400" height="300"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Элементы управления
+        const xInput = document.getElementById('x');
+        const yInput = document.getElementById('y');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const colorInput = document.getElementById('color');
+        
+        // Функция отрисовки прямоугольника
+        function drawRectangle() {
+            // Очищаем canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Получаем значения из полей ввода
+            const x = parseInt(xInput.value);
+            const y = parseInt(yInput.value);
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+            const color = colorInput.value;
+            
+            // Рисуем прямоугольник
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+        }
+        
+        // Обработчики событий для обновления прямоугольника при изменении значений
+        xInput.addEventListener('input', drawRectangle);
+        yInput.addEventListener('input', drawRectangle);
+        widthInput.addEventListener('input', drawRectangle);
+        heightInput.addEventListener('input', drawRectangle);
+        colorInput.addEventListener('input', drawRectangle);
+        
+        // Первоначальная отрисовка
+        drawRectangle();
+    </script>
+</body>
+</html>

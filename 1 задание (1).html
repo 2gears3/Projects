@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дом с забором</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #e0f7fa;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Практическое задание номер 1</h2>
+        <h1>Дом с забором и садом</h1>
+        <canvas id="houseCanvas" width="800" height="500"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('houseCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Функция для рисования дома
+        function drawHouse() {
+            // Основание дома
+            ctx.fillStyle = '#ffcc99';
+            ctx.fillRect(300, 250, 200, 150);
+            
+            // Крыша
+            ctx.fillStyle = '#cc3333';
+            ctx.beginPath();
+            ctx.moveTo(280, 250);
+            ctx.lineTo(400, 80);
+            ctx.lineTo(520, 250);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Дверь
+            ctx.fillStyle = '#663300';
+            ctx.fillRect(380, 320, 40, 80);
+            
+            // Ручка двери
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.arc(410, 360, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Окна
+            ctx.fillStyle = '#99ccff';
+            ctx.fillRect(320, 280, 40, 40);
+            ctx.fillRect(440, 280, 40, 40);
+            
+            // Рамы окон
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(320, 280, 40, 40);
+            ctx.beginPath();
+            ctx.moveTo(340, 280);
+            ctx.lineTo(340, 320);
+            ctx.moveTo(320, 300);
+            ctx.lineTo(360, 300);
+            ctx.stroke();
+            
+            ctx.strokeRect(440, 280, 40, 40);
+            ctx.beginPath();
+            ctx.moveTo(460, 280);
+            ctx.lineTo(460, 320);
+            ctx.moveTo(440, 300);
+            ctx.lineTo(480, 300);
+            ctx.stroke();
+        }
+
+        // Функция для рисования забора
+        function drawFence() {
+            ctx.fillStyle = '#996633';
+            
+            // Основание забора
+            ctx.fillRect(0, 350, canvas.width, 20);
+            
+            // Штакетины забора
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.fillRect(i, 250, 10, 100);
+            }
+            
+            // Верхняя часть забора
+            ctx.fillStyle = '#663300';
+            ctx.fillRect(0, 250, canvas.width, 10);
+        }
+
+        // Функция для рисования дерева
+        function drawTree(x, y) {
+            // Ствол
+            ctx.fillStyle = '#663300';
+            ctx.fillRect(x, y, 20, 60);
+            
+            // Крона
+            ctx.fillStyle = '#339933';
+            ctx.beginPath();
+            ctx.arc(x + 10, y - 30, 40, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Функция для рисования солнца
+        function drawSun() {
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.arc(700, 80, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Лучи солнца
+            ctx.strokeStyle = '#ffcc00';
+            ctx.lineWidth = 3;
+            
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * Math.PI) / 6;
+                const startX = 700 + Math.cos(angle) * 45;
+                const startY = 80 + Math.sin(angle) * 45;
+                const endX = 700 + Math.cos(angle) * 65;
+                const endY = 80 + Math.sin(angle) * 65;
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+        }
+
+        // Функция для рисования облаков
+        function drawCloud(x, y) {
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.arc(x + 15, y - 10, 25, 0, Math.PI * 2);
+            ctx.arc(x + 35, y, 20, 0, Math.PI * 2);
+            ctx.arc(x + 20, y + 10, 22, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Функция для рисования травы
+        function drawGrass() {
+            ctx.fillStyle = '#66bb66';
+            ctx.fillRect(0, 370, canvas.width, canvas.height - 370);
+            
+            // Травинки
+            ctx.strokeStyle = '#339933';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * canvas.width;
+                const height = 5 + Math.random() * 15;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, 370);
+                ctx.lineTo(x, 370 - height);
+                ctx.stroke();
+            }
+        }
+
+        // Основная функция отрисовки
+        function drawScene() {
+            // Небо
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F7FA');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем элементы сцены
+            drawSun();
+            drawCloud(100, 80);
+            drawCloud(200, 120);
+            drawCloud(500, 70);
+            drawGrass();
+            drawFence();
+            drawHouse();
+            drawTree(100, 290);
+            drawTree(650, 290);
+        }
+
+        // Запускаем отрисовку
+        drawScene();
+    </script>
+</body>
+</html>
