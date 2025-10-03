@@ -1,0 +1,50 @@
+<canvas id="canvas1" width="400" height="300"></canvas>
+<canvas id="canvas2" width="400" height="300"></canvas>
+<script>
+    const canvas1 = document.getElementById("canvas1");
+    const context1 = canvas1.getContext("2d");
+    
+    const centerX1 = canvas1.width / 2;
+    const centerY1 = canvas1.height / 2;
+    const radius1 = 100;
+    
+    context1.beginPath();
+    context1.arc(centerX1, centerY1, radius1, 0, 2 * Math.PI);
+    context1.stroke();
+    
+    for (let i = 0; i < 30; i++) {
+        const angle = (i / 30) * 2 * Math.PI;
+        const endX = centerX1 + radius1 * Math.cos(angle);
+        const endY = centerY1 + radius1 * Math.sin(angle);
+        
+        context1.beginPath();
+        context1.moveTo(centerX1, centerY1);
+        context1.lineTo(endX, endY);
+        context1.stroke();
+    }
+    
+    context1.beginPath();
+    context1.arc(centerX1, centerY1, 10, 0, 2 * Math.PI);
+    context1.fillStyle = 'black';
+    context1.fill();
+
+    const canvas2 = document.getElementById("canvas2");
+    const context2 = canvas2.getContext("2d");
+    
+    const centerX2 = canvas2.width / 2;
+    const centerY2 = canvas2.height / 2;
+    let radius2 = 100;
+    
+    while (radius2 > 0) {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        
+        context2.beginPath();
+        context2.arc(centerX2, centerY2, radius2, 0, 2 * Math.PI);
+        context2.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        context2.fill();
+        
+        radius2--;
+    }
+</script>
