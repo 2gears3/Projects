@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рисование линий от точки (0,0)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .thickness-preview, .color-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .thickness-sample {
+            height: 20px;
+            background-color: black;
+            margin-left: 10px;
+        }
+        
+        .color-sample {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #333;
+            border-radius: 4px;
+        }
+        
+        .info {
+            margin-top: 15px;
+            text-align: center;
+            color: #555;
+        }
+        
+        canvas {
+            border: 2px solid #333;
+            background-color: white;
+            cursor: crosshair;
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .key-hint {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Рисование линий от точки (0,0)</h1>
+    
+    <div class="controls">
+        <div class="control-group">
+            <div class="thickness-preview">
+                <span>Толщина линии:</span>
+                <div id="thicknessSample" class="thickness-sample"></div>
+            </div>
+            <div>Клавиши: <span class="key-hint">1</span> <span class="key-hint">2</span> <span class="key-hint">3</span></div>
+        </div>
+        
+        <div class="control-group">
+            <div class="color-preview">
+                <span>Цвет линии:</span>
+                <div id="colorSample" class="color-sample"></div>
+            </div>
+            <div>Клавиши: <span class="key-hint">R</span> <span class="key-hint">B</span> <span class="key-hint">K</span></div>
+        </div>
+    </div>
+    
+    <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <div class="status" id="status">Текущая толщина: нормальная (2), Цвет: черный</div>
+    
+    <div class="info">
+        <p>Нажмите ЛКМ для рисования линии от (0,0) до положения курсора</p>
+        <p><span class="key-hint">1</span> - тонкая, <span class="key-hint">2</span> - нормальная, <span class="key-hint">3</span> - толстая</p>
+        <p><span class="key-hint">R</span> - красный, <span class="key-hint">B</span> - синий, <span class="key-hint">K</span> - черный</p>
+        <p><span class="key-hint">C</span> - очистить холст</p>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        var canvas, ctx;
+        var lineThickness = 2; // Текущая толщина линии (1-тонкая, 2-нормальная, 3-толстая)
+        var lineColor = 'black'; // Текущий цвет линии
+        
+        // Функция инициализации
+        function init() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Рисуем рамку вокруг canvas
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 0, 640, 480);
+            
+            // Добавляем обработчики событий
+            canvas.addEventListener("mousedown", drawLine);
+            document.addEventListener("keydown", handleKeyPress);
+            
+            // Обновляем отображение настроек
+            updateDisplay();
+        }
+        
+        // Функция рисования линии от (0,0) до позиции мыши
+        function drawLine(event) {
+            // Получаем координаты мыши относительно canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            
+            // Устанавливаем стиль линии
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = getThicknessValue();
+            ctx.lineCap = 'round';
+            
+            // Рисуем линию от (0,0) до позиции мыши
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+            
+            console.log(`Нарисована линия от (0,0) до (${mouseX},${mouseY}) толщиной ${ctx.lineWidth}px, цвет: ${lineColor}`);
+        }
+        
+        // Функция обработки нажатий клавиш
+        function handleKeyPress(event) {
+            switch(event.key.toLowerCase()) {
+                // Толщина линии
+                case '1':
+                    lineThickness = 1;
+                    updateDisplay();
+                    break;
+                case '2':
+                    lineThickness = 2;
+                    updateDisplay();
+                    break;
+                case '3':
+                    lineThickness = 3;
+                    updateDisplay();
+                    break;
+                
+                // Цвет линии
+                case 'r': // Красный
+                case 'к': // Русская R
+                    lineColor = 'red';
+                    updateDisplay();
+                    break;
+                case 'b': // Синий
+                case 'и': // Русская B
+                    lineColor = 'blue';
+                    updateDisplay();
+                    break;
+                case 'k': // Черный
+                case 'л': // Русская K
+                    lineColor = 'black';
+                    updateDisplay();
+                    break;
+                
+                // Очистка
+                case 'c':
+                case 'с': // Русская C
+                    clearCanvas();
+                    break;
+            }
+        }
+        
+        // Функция получения числового значения толщины
+        function getThicknessValue() {
+            switch(lineThickness) {
+                case 1: return 1;   // Тонкая
+                case 2: return 3;   // Нормальная
+                case 3: return 6;   // Толстая
+                default: return 3;
+            }
+        }
+        
+        // Функция получения названия цвета
+        function getColorName() {
+            switch(lineColor) {
+                case 'red': return 'красный';
+                case 'blue': return 'синий';
+                case 'black': return 'черный';
+                default: return 'черный';
+            }
+        }
+        
+        // Функция получения названия толщины
+        function getThicknessName() {
+            switch(lineThickness) {
+                case 1: return "тонкая (1)";
+                case 2: return "нормальная (2)"; 
+                case 3: return "толстая (3)";
+                default: return "нормальная (2)";
+            }
+        }
+        
+        // Функция обновления отображения настроек
+        function updateDisplay() {
+            // Обновляем текст статуса
+            document.getElementById("status").textContent = 
+                `Текущая толщина: ${getThicknessName()}, Цвет: ${getColorName()}`;
+            
+            // Обновляем визуальный образец толщины
+            const thicknessSample = document.getElementById("thicknessSample");
+            thicknessSample.style.width = (getThicknessValue() * 8) + "px";
+            thicknessSample.style.height = (getThicknessValue() * 2) + "px";
+            thicknessSample.style.backgroundColor = lineColor;
+            
+            // Обновляем визуальный образец цвета
+            const colorSample = document.getElementById("colorSample");
+            colorSample.style.backgroundColor = lineColor;
+        }
+        
+        // Функция очистки canvas
+        function clearCanvas() {
+            ctx.clearRect(0, 0, 640, 480);
+            // Восстанавливаем рамку
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 0, 640, 480);
+        }
+        
+        // Инициализация при загрузке страницы
+        window.onload = init;
+    </script>
+</body>
+</html>
