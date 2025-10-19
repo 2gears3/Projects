@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление квадратом</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .coordinates {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            width: 80px;
+            padding: 5px;
+        }
+        
+        .info {
+            margin-top: 15px;
+            text-align: center;
+            color: #555;
+        }
+        
+        canvas {
+            border: 2px solid #333;
+            background-color: white;
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body onload="init();">
+    <h1>Управление квадратом</h1>
+    
+    <div class="controls">
+        <div class="coordinates">
+            <input type="text" id="x" readonly>
+            <input type="text" id="y" readonly>
+        </div>
+    </div>
+    
+    <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <div class="status" id="status">Режим: Перемещение</div>
+    
+    <div class="info">
+        <p>Используйте стрелки для перемещения</p>
+        <p>ПРОБЕЛ - переключение режима рисования/перемещения</p>
+        <p>ESC - сброс в исходное положение</p>
+        <p>1, 2, 3 - изменение цвета квадрата</p>
+        <p>B, M, S - изменение размера квадрата</p>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        var x = 50, y = 50; // Начальные координаты
+        var canvas, ctx; // Canvas и его контекст
+        var isDrawingMode = false; // Режим рисования (false - перемещение)
+        var squareColor = 'blue'; // Цвет квадрата
+        var squareSize = 20; // Размер квадрата
+        var originalX = 50, originalY = 50; // Исходное положение
+        
+        // Функция инициализации
+        function init() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Рисуем рамку вокруг canvas
+            ctx.strokeStyle = 'black';
+            ctx.strokeRect(0, 0, 640, 480);
+            
+            // Рисуем начальный квадрат
+            drawSquare();
+            
+            // Добавляем обработчик событий клавиатуры
+            document.addEventListener("keydown", move);
+            
+            // Обновляем отображение координат
+            updateCoordinates();
+        }
+        
+        // Функция отрисовки квадрата
+        function drawSquare() {
+            ctx.fillStyle = squareColor;
+            ctx.fillRect(x, y, squareSize, squareSize);
+        }
+        
+        // Функция обновления координат в полях ввода
+        function updateCoordinates() {
+            document.getElementById("x").value = "x=" + x;
+            document.getElementById("y").value = "y=" + y;
+        }
+        
+        // Функция обработки движения
+        function move(event) {
+            // Если режим перемещения - очищаем старое место
+            if (!isDrawingMode) {
+                ctx.clearRect(x, y, squareSize, squareSize);
+            }
+            
+            // Обработка нажатий клавиш
+            switch(event.keyCode) {
+                // Стрелки для перемещения
+                case 38: // Вверх
+                    if (y > 0) y -= 5;
+                    break;
+                case 40: // Вниз
+                    if (y < 480 - squareSize) y += 5;
+                    break;
+                case 39: // Вправо
+                    if (x < 640 - squareSize) x += 5;
+                    break;
+                case 37: // Влево
+                    if (x > 0) x -= 5;
+                    break;
+                
+                // ПРОБЕЛ - переключение режима
+                case 32:
+                    isDrawingMode = !isDrawingMode;
+                    document.getElementById("status").textContent = 
+                        "Режим: " + (isDrawingMode ? "Рисование" : "Перемещение");
+                    break;
+                
+                // ESC - сброс
+                case 27:
+                    // Очищаем весь canvas
+                    ctx.clearRect(0, 0, 640, 480);
+                    // Восстанавливаем рамку
+                    ctx.strokeStyle = 'black';
+                    ctx.strokeRect(0, 0, 640, 480);
+                    // Возвращаем квадрат в исходное положение
+                    x = originalX;
+                    y = originalY;
+                    break;
+                
+                // Цифры для изменения цвета
+                case 49: // 1
+                    squareColor = 'red';
+                    break;
+                case 50: // 2
+                    squareColor = 'green';
+                    break;
+                case 51: // 3
+                    squareColor = 'blue';
+                    break;
+                
+                // Буквы для изменения размера
+                case 66: // B
+                    squareSize = 30;
+                    break;
+                case 77: // M
+                    squareSize = 20;
+                    break;
+                case 83: // S
+                    squareSize = 10;
+                    break;
+            }
+            
+            // Рисуем квадрат на новом месте
+            drawSquare();
+            
+            // Обновляем отображение координат
+            updateCoordinates();
+        }
+    </script>
+</body>
+</html>
