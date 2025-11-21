@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag-and-Drop двух квадратов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .color-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #333;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Drag-and-Drop двух квадратов</h1>
+        
+        <div class="instructions">
+            <p><strong>Управление:</strong></p>
+            <p>• Перетаскивайте квадраты мышью</p>
+            <p>• Нажмите клавиши 1, 2, 3 для смены цвета квадратов</p>
+            <p>• Квадраты не могут перекрываться и выходить за границы canvas</p>
+            <p>• При перетаскивании квадрат становится серым</p>
+        </div>
+
+        <canvas id="dragCanvas" width="600" height="400"></canvas>
+
+        <div class="info">
+            <p><strong>Текущий цвет:</strong> 
+                <span class="color-indicator" id="colorIndicator" style="background-color: #3498db;"></span>
+                <span id="colorText">Синий (нажмите 1, 2, 3 для смены)</span>
+            </p>
+            <p><strong>Статус:</strong> <span id="status">Готов к перетаскиванию</span></p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('dragCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusElement = document.getElementById('status');
+        const colorIndicator = document.getElementById('colorIndicator');
+        const colorText = document.getElementById('colorText');
+
+        // Определяем квадраты
+        const squares = [
+            {
+                x: 50,
+                y: 50,
+                size: 80,
+                color: '#3498db', // Синий
+                originalColor: '#3498db',
+                isDragging: false,
+                dragOffsetX: 0,
+                dragOffsetY: 0
+            },
+            {
+                x: 200,
+                y: 150,
+                size: 80,
+                color: '#e74c3c', // Красный
+                originalColor: '#e74c3c',
+                isDragging: false,
+                dragOffsetX: 0,
+                dragOffsetY: 0
+            }
+        ];
+
+        // Цвета для клавиш 1, 2, 3
+        const colors = [
+            { code: '#3498db', name: 'Синий' },
+            { code: '#e74c3c', name: 'Красный' },
+            { code: '#2ecc71', name: 'Зеленый' }
+        ];
+        let currentColorIndex = 0;
+
+        // Функция для отрисовки всех квадратов
+        function drawSquares() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            squares.forEach(square => {
+                ctx.fillStyle = square.color;
+                ctx.fillRect(square.x, square.y, square.size, square.size);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(square.x, square.y, square.size, square.size);
+                
+                // Добавляем номер квадрата
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    squares.indexOf(square) + 1,
+                    square.x + square.size / 2,
+                    square.y + square.size / 2
+                );
+            });
+        }
+
+        // Функция проверки попадания в квадрат
+        function isPointInSquare(x, y, square) {
+            return x >= square.x && 
+                   x <= square.x + square.size && 
+                   y >= square.y && 
+                   y <= square.y + square.size;
+        }
+
+        // Функция проверки пересечения двух квадратов
+        function squaresIntersect(square1, square2) {
+            return !(square1.x + square1.size <= square2.x ||
+                     square2.x + square2.size <= square1.x ||
+                     square1.y + square1.size <= square2.y ||
+                     square2.y + square2.size <= square1.y);
+        }
+
+        // Функция проверки выхода за границы canvas
+        function isWithinCanvas(square) {
+            return square.x >= 0 && 
+                   square.x + square.size <= canvas.width && 
+                   square.y >= 0 && 
+                   square.y + square.size <= canvas.height;
+        }
+
+        // Обработчики событий мыши
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Проверяем попадание в любой квадрат
+            for (let i = 0; i < squares.length; i++) {
+                if (isPointInSquare(mouseX, mouseY, squares[i])) {
+                    squares[i].isDragging = true;
+                    squares[i].dragOffsetX = mouseX - squares[i].x;
+                    squares[i].dragOffsetY = mouseY - squares[i].y;
+                    squares[i].color = '#95a5a6'; // Серый цвет при перетаскивании
+                    statusElement.textContent = `Перетаскивается квадрат ${i + 1}`;
+                    drawSquares();
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            squares.forEach((square, index) => {
+                if (square.isDragging) {
+                    // Вычисляем новую позицию
+                    const newX = mouseX - square.dragOffsetX;
+                    const newY = mouseY - square.dragOffsetY;
+
+                    // Сохраняем старую позицию на случай отката
+                    const oldX = square.x;
+                    const oldY = square.y;
+
+                    // Пробуем установить новую позицию
+                    square.x = newX;
+                    square.y = newY;
+
+                    // Проверяем условия
+                    let canMove = true;
+
+                    // Проверка выхода за границы
+                    if (!isWithinCanvas(square)) {
+                        canMove = false;
+                    }
+
+                    // Проверка пересечения с другими квадратами
+                    squares.forEach((otherSquare, otherIndex) => {
+                        if (index !== otherIndex && squaresIntersect(square, otherSquare)) {
+                            canMove = false;
+                        }
+                    });
+
+                    // Если движение невозможно - возвращаем старую позицию
+                    if (!canMove) {
+                        square.x = oldX;
+                        square.y = oldY;
+                    }
+
+                    drawSquares();
+                }
+            });
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            squares.forEach((square, index) => {
+                if (square.isDragging) {
+                    square.isDragging = false;
+                    square.color = square.originalColor; // Возвращаем исходный цвет
+                    statusElement.textContent = `Квадрат ${index + 1} отпущен`;
+                    drawSquares();
+                }
+            });
+        });
+
+        canvas.addEventListener('mouseleave', (e) => {
+            squares.forEach((square, index) => {
+                if (square.isDragging) {
+                    square.isDragging = false;
+                    square.color = square.originalColor;
+                    statusElement.textContent = `Перетаскивание отменено (мышь за пределами canvas)`;
+                    drawSquares();
+                }
+            });
+        });
+
+        // Обработчики клавиатуры для смены цвета
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '1' || e.key === '2' || e.key === '3') {
+                currentColorIndex = parseInt(e.key) - 1;
+                
+                // Меняем цвет всех квадратов
+                squares.forEach(square => {
+                    square.color = colors[currentColorIndex].code;
+                    square.originalColor = colors[currentColorIndex].code;
+                });
+                
+                // Обновляем индикатор цвета
+                colorIndicator.style.backgroundColor = colors[currentColorIndex].code;
+                colorText.textContent = `${colors[currentColorIndex].name} (нажмите 1, 2, 3 для смены)`;
+                
+                drawSquares();
+                statusElement.textContent = `Цвет изменен на ${colors[currentColorIndex].name}`;
+            }
+        });
+
+        // Инициализация
+        function init() {
+            // Устанавливаем начальный цвет индикатора
+            colorIndicator.style.backgroundColor = colors[currentColorIndex].code;
+            colorText.textContent = `${colors[currentColorIndex].name} (нажмите 1, 2, 3 для смены)`;
+            
+            drawSquares();
+        }
+
+        // Запускаем приложение
+        init();
+    </script>
+</body>
+</html>
