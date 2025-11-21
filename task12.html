@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Классификация стран по частям света</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .checkbox-item input {
+            margin: 0;
+        }
+        .countries-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .country {
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .europe {
+            background-color: #3498db;
+            border: 2px solid #2980b9;
+        }
+        .asia {
+            background-color: #e74c3c;
+            border: 2px solid #c0392b;
+        }
+        .africa {
+            background-color: #2ecc71;
+            border: 2px solid #27ae60;
+        }
+        .america {
+            background-color: #f39c12;
+            border: 2px solid #d35400;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .show-all {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .show-all:hover {
+            background-color: #27ae60;
+        }
+        .hide-all {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .hide-all:hover {
+            background-color: #c0392b;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Классификация стран по частям света</h1>
+        
+        <div class="instructions">
+            <p><strong>Инструкция:</strong> Используйте checkbox'ы для отображения/скрытия стран по частям света. Если все галочки сняты - список пуст.</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Выберите части света для отображения:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="europeCheckbox" checked>
+                        <label for="europeCheckbox" style="color: #3498db;">Европа</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="asiaCheckbox" checked>
+                        <label for="asiaCheckbox" style="color: #e74c3c;">Азия</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="africaCheckbox" checked>
+                        <label for="africaCheckbox" style="color: #2ecc71;">Африка</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="americaCheckbox" checked>
+                        <label for="americaCheckbox" style="color: #f39c12;">Америка</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="show-all" id="showAll">Показать все</button>
+                <button class="hide-all" id="hideAll">Скрыть все</button>
+            </div>
+        </div>
+
+        <div class="countries-list" id="countriesList">
+            <!-- Европа -->
+            <div class="country europe">Россия</div>
+            <div class="country europe">Германия</div>
+            <div class="country europe">Франция</div>
+            <div class="country europe">Италия</div>
+            <div class="country europe">Испания</div>
+            <div class="country europe">Великобритания</div>
+            <div class="country europe">Польша</div>
+            <div class="country europe">Украина</div>
+            
+            <!-- Азия -->
+            <div class="country asia">Китай</div>
+            <div class="country asia">Индия</div>
+            <div class="country asia">Япония</div>
+            <div class="country asia">Южная Корея</div>
+            <div class="country asia">Турция</div>
+            <div class="country asia">Иран</div>
+            <div class="country asia">Саудовская Аравия</div>
+            <div class="country asia">Таиланд</div>
+            
+            <!-- Африка -->
+            <div class="country africa">Египет</div>
+            <div class="country africa">Нигерия</div>
+            <div class="country africa">ЮАР</div>
+            <div class="country africa">Кения</div>
+            <div class="country africa">Эфиопия</div>
+            <div class="country africa">Марокко</div>
+            <div class="country africa">Гана</div>
+            <div class="country africa">Танзания</div>
+            
+            <!-- Америка -->
+            <div class="country america">США</div>
+            <div class="country america">Канада</div>
+            <div class="country america">Бразилия</div>
+            <div class="country america">Мексика</div>
+            <div class="country america">Аргентина</div>
+            <div class="country america">Колумбия</div>
+            <div class="country america">Чили</div>
+            <div class="country america">Перу</div>
+        </div>
+
+        <div class="status" id="status">
+            Отображены все части света
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Функция для обновления отображения стран
+            function updateCountriesDisplay() {
+                const europeChecked = $('#europeCheckbox').is(':checked');
+                const asiaChecked = $('#asiaCheckbox').is(':checked');
+                const africaChecked = $('#africaCheckbox').is(':checked');
+                const americaChecked = $('#americaCheckbox').is(':checked');
+                
+                // Скрываем все страны
+                $('.country').hide();
+                
+                // Показываем выбранные категории
+                if (europeChecked) {
+                    $('.country.europe').show();
+                }
+                if (asiaChecked) {
+                    $('.country.asia').show();
+                }
+                if (africaChecked) {
+                    $('.country.africa').show();
+                }
+                if (americaChecked) {
+                    $('.country.america').show();
+                }
+                
+                // Обновляем статус
+                updateStatus();
+            }
+            
+            // Функция для обновления статуса
+            function updateStatus() {
+                const totalCountries = $('.country').length;
+                const visibleCountries = $('.country:visible').length;
+                const europeChecked = $('#europeCheckbox').is(':checked');
+                const asiaChecked = $('#asiaCheckbox').is(':checked');
+                const africaChecked = $('#africaCheckbox').is(':checked');
+                const americaChecked = $('#americaCheckbox').is(':checked');
+                
+                let statusText = '';
+                
+                if (visibleCountries === 0) {
+                    statusText = 'Все страны скрыты';
+                } else if (visibleCountries === totalCountries) {
+                    statusText = 'Отображены все части света';
+                } else {
+                    const visibleRegions = [];
+                    if (europeChecked) visibleRegions.push('Европа');
+                    if (asiaChecked) visibleRegions.push('Азия');
+                    if (africaChecked) visibleRegions.push('Африка');
+                    if (americaChecked) visibleRegions.push('Америка');
+                    
+                    statusText = `Отображены: ${visibleRegions.join(', ')}`;
+                }
+                
+                $('#status').text(statusText);
+            }
+            
+            // Обработчики для checkbox'ов
+            $('#europeCheckbox').change(updateCountriesDisplay);
+            $('#asiaCheckbox').change(updateCountriesDisplay);
+            $('#africaCheckbox').change(updateCountriesDisplay);
+            $('#americaCheckbox').change(updateCountriesDisplay);
+            
+            // Кнопка "Показать все"
+            $('#showAll').click(function() {
+                $('#europeCheckbox, #asiaCheckbox, #africaCheckbox, #americaCheckbox').prop('checked', true);
+                updateCountriesDisplay();
+            });
+            
+            // Кнопка "Скрыть все"
+            $('#hideAll').click(function() {
+                $('#europeCheckbox, #asiaCheckbox, #africaCheckbox, #americaCheckbox').prop('checked', false);
+                updateCountriesDisplay();
+            });
+            
+            // Инициализация
+            updateCountriesDisplay();
+            
+            // Добавляем анимацию при появлении
+            $('.country').hide().fadeIn(1000);
+        });
+    </script>
+</body>
+</html>
