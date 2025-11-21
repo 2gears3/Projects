@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимация прямоугольника с кнопками-залипанием</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        button:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .move-left {
+            background-color: #3498db;
+            color: white;
+        }
+        .move-right {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .move-up {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .move-down {
+            background-color: #f39c12;
+            color: white;
+        }
+        .reset-btn {
+            background-color: #95a5a6;
+            color: white;
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+        .animation-area {
+            position: relative;
+            height: 300px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        #animatedRect {
+            position: absolute;
+            width: 100px;
+            height: 60px;
+            background-color: #9b59b6;
+            border: 2px solid #8e44ad;
+            border-radius: 8px;
+            left: 50px;
+            top: 120px;
+            transition: background-color 0.3s;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .coordinates {
+            background-color: #34495e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Анимация прямоугольника с кнопками-залипанием</h1>
+        
+        <div class="instructions">
+            <p><strong>Инструкция:</strong> Нажмите на кнопку направления - она "залипнет" и прямоугольник начнет движение. Для остановки нажмите другую кнопку или "Сброс".</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-buttons">
+                <button class="move-left" id="moveLeft">← Влево</button>
+                <button class="move-right" id="moveRight">Вправо →</button>
+                <button class="move-up" id="moveUp">↑ Вверх</button>
+                <button class="move-down" id="moveDown">Вниз ↓</button>
+                <button class="reset-btn" id="resetAnimation">Сброс</button>
+            </div>
+            
+            <div class="coordinates" id="coordinates">
+                Позиция: X: 50px, Y: 120px
+            </div>
+        </div>
+
+        <div class="animation-area">
+            <div id="animatedRect"></div>
+        </div>
+
+        <div class="status" id="status">
+            Готов к анимации. Выберите направление.
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const $rect = $('#animatedRect');
+            const $moveLeft = $('#moveLeft');
+            const $moveRight = $('#moveRight');
+            const $moveUp = $('#moveUp');
+            const $moveDown = $('#moveDown');
+            const $resetBtn = $('#resetAnimation');
+            const $status = $('#status');
+            const $coordinates = $('#coordinates');
+            
+            let currentDirection = null;
+            let isAnimating = false;
+            const animationSpeed = 800;
+            const moveDistance = 50;
+            
+            const initialPosition = {
+                left: 50,
+                top: 120
+            };
+            
+            // Функция для обновления координат
+            function updateCoordinates() {
+                const left = parseInt($rect.css('left'));
+                const top = parseInt($rect.css('top'));
+                $coordinates.text(`Позиция: X: ${left}px, Y: ${top}px`);
+            }
+            
+            // Функция для сброса всех кнопок
+            function resetAllButtons() {
+                $moveLeft.prop('disabled', false);
+                $moveRight.prop('disabled', false);
+                $moveUp.prop('disabled', false);
+                $moveDown.prop('disabled', false);
+            }
+            
+            // Функция запуска анимации в выбранном направлении
+            function startDirectionAnimation(direction) {
+                if (isAnimating) return;
+                
+                currentDirection = direction;
+                isAnimating = true;
+                
+                // Отключаем все кнопки кроме активной
+                resetAllButtons();
+                $(`#move${direction.charAt(0).toUpperCase() + direction.slice(1)}`).prop('disabled', true);
+                
+                const currentLeft = parseInt($rect.css('left'));
+                const currentTop = parseInt($rect.css('top'));
+                let newLeft = currentLeft;
+                let newTop = currentTop;
+                
+                // Определяем новую позицию в зависимости от направления
+                switch(direction) {
+                    case 'left':
+                        newLeft = Math.max(0, currentLeft - moveDistance);
+                        $status.text('Движение влево...');
+                        break;
+                    case 'right':
+                        newLeft = Math.min(500 - 100, currentLeft + moveDistance); // 500 - ширина области, 100 - ширина прямоугольника
+                        $status.text('Движение вправо...');
+                        break;
+                    case 'up':
+                        newTop = Math.max(0, currentTop - moveDistance);
+                        $status.text('Движение вверх...');
+                        break;
+                    case 'down':
+                        newTop = Math.min(300 - 60, currentTop + moveDistance); // 300 - высота области, 60 - высота прямоугольника
+                        $status.text('Движение вниз...');
+                        break;
+                }
+                
+                // Запускаем анимацию
+                $rect.animate({
+                    left: newLeft + 'px',
+                    top: newTop + 'px'
+                }, animationSpeed, function() {
+                    // Анимация завершена
+                    isAnimating = false;
+                    $status.text(`Движение ${getDirectionText(direction)} завершено`);
+                    updateCoordinates();
+                    
+                    // Если кнопка все еще активна (не была сброшена), продолжаем движение
+                    if ($(`#move${direction.charAt(0).toUpperCase() + direction.slice(1)}`).prop('disabled')) {
+                        setTimeout(() => startDirectionAnimation(direction), 100);
+                    }
+                });
+                
+                updateCoordinates();
+            }
+            
+            // Функция для получения текстового описания направления
+            function getDirectionText(direction) {
+                const directions = {
+                    'left': 'влево',
+                    'right': 'вправо',
+                    'up': 'вверх',
+                    'down': 'вниз'
+                };
+                return directions[direction];
+            }
+            
+            // Функция сброса анимации
+            function resetAnimation() {
+                $rect.stop(true, true); // Останавливаем анимацию
+                $rect.css({
+                    left: initialPosition.left + 'px',
+                    top: initialPosition.top + 'px'
+                });
+                resetAllButtons();
+                currentDirection = null;
+                isAnimating = false;
+                $status.text('Анимация сброшена. Выберите направление.');
+                updateCoordinates();
+            }
+            
+            // Обработчики событий для кнопок направлений
+            $moveLeft.click(function() {
+                if (!isAnimating || currentDirection !== 'left') {
+                    startDirectionAnimation('left');
+                }
+            });
+            
+            $moveRight.click(function() {
+                if (!isAnimating || currentDirection !== 'right') {
+                    startDirectionAnimation('right');
+                }
+            });
+            
+            $moveUp.click(function() {
+                if (!isAnimating || currentDirection !== 'up') {
+                    startDirectionAnimation('up');
+                }
+            });
+            
+            $moveDown.click(function() {
+                if (!isAnimating || currentDirection !== 'down') {
+                    startDirectionAnimation('down');
+                }
+            });
+            
+            $resetBtn.click(resetAnimation);
+            
+            // Инициализация
+            updateCoordinates();
+        });
+    </script>
+</body>
+</html>
