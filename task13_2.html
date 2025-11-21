@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимация прямоугольника с выбором параметров</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="color"], select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 200px;
+        }
+        .animation-area {
+            position: relative;
+            height: 300px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        #animatedRect {
+            position: absolute;
+            width: 100px;
+            height: 60px;
+            background-color: #3498db;
+            border: 2px solid #2980b9;
+            border-radius: 5px;
+            left: 50px;
+            top: 50px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .start-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .reset-btn:hover {
+            background-color: #c0392b;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Анимация прямоугольника</h1>
+        
+        <div class="instructions">
+            <p><strong>Инструкция:</strong> Выберите цвет прямоугольника и скорость анимации, затем нажмите "Запустить анимацию".</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="rectColor">Цвет прямоугольника:</label>
+                <input type="color" id="rectColor" value="#3498db">
+            </div>
+            
+            <div class="control-group">
+                <label for="animationSpeed">Скорость анимации:</label>
+                <select id="animationSpeed">
+                    <option value="slow">Медленно (1000ms)</option>
+                    <option value="600" selected>Средне (600ms)</option>
+                    <option value="fast">Быстро (200ms)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="animation-area">
+            <div id="animatedRect"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="start-btn" id="startAnimation">Запустить анимацию</button>
+            <button class="reset-btn" id="resetAnimation">Сбросить</button>
+        </div>
+
+        <div class="status" id="status">
+            Готов к анимации
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const $rect = $('#animatedRect');
+            const $startBtn = $('#startAnimation');
+            const $resetBtn = $('#resetAnimation');
+            const $colorInput = $('#rectColor');
+            const $speedSelect = $('#animationSpeed');
+            const $status = $('#status');
+            
+            let isAnimating = false;
+            
+            // Функция запуска анимации
+            function startAnimation() {
+                if (isAnimating) return;
+                
+                isAnimating = true;
+                $status.text('Анимация выполняется...');
+                
+                // Получаем выбранные параметры
+                const color = $colorInput.val();
+                const speed = $speedSelect.val();
+                
+                // Устанавливаем цвет
+                $rect.css({
+                    'background-color': color,
+                    'border-color': darkenColor(color, 20)
+                });
+                
+                // Комбинированная анимация: прозрачность, размеры, положение
+                $rect.animate({
+                    opacity: 0.3,
+                    width: '200px',
+                    height: '120px',
+                    left: '300px',
+                    top: '150px'
+                }, speed)
+                .animate({
+                    opacity: 0.8,
+                    width: '80px',
+                    height: '120px',
+                    left: '100px',
+                    top: '50px'
+                }, speed)
+                .animate({
+                    opacity: 1,
+                    width: '150px',
+                    height: '80px',
+                    left: '200px',
+                    top: '200px'
+                }, speed, function() {
+                    // Функция после завершения анимации
+                    isAnimating = false;
+                    $status.text('Анимация завершена');
+                });
+            }
+            
+            // Функция сброса анимации
+            function resetAnimation() {
+                $rect.stop(true, true); // Останавливаем анимацию и переходим к конечному состоянию
+                $rect.css({
+                    'width': '100px',
+                    'height': '60px',
+                    'left': '50px',
+                    'top': '50px',
+                    'opacity': 1,
+                    'background-color': '#3498db',
+                    'border-color': '#2980b9'
+                });
+                $colorInput.val('#3498db');
+                $speedSelect.val('600');
+                isAnimating = false;
+                $status.text('Анимация сброшена');
+            }
+            
+            // Вспомогательная функция для затемнения цвета
+            function darkenColor(color, percent) {
+                let num = parseInt(color.slice(1), 16),
+                    amt = Math.round(2.55 * percent),
+                    R = (num >> 16) - amt,
+                    G = (num >> 8 & 0x00FF) - amt,
+                    B = (num & 0x0000FF) - amt;
+                return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+            }
+            
+            // Обработчики событий
+            $startBtn.click(startAnimation);
+            $resetBtn.click(resetAnimation);
+            
+            // Изменение цвета в реальном времени
+            $colorInput.change(function() {
+                if (!isAnimating) {
+                    const color = $(this).val();
+                    $rect.css({
+                        'background-color': color,
+                        'border-color': darkenColor(color, 20)
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
