@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рисование многоугольника</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="number"], input[type="color"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 5px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h2>Параметры многоугольника</h2>
+            
+            <div class="control-group">
+                <label for="radius">Радиус описанной окружности:</label>
+                <input type="number" id="radius" min="10" max="200" value="100">
+            </div>
+            
+            <div class="control-group">
+                <label for="sides">Количество углов:</label>
+                <input type="number" id="sides" min="3" max="20" value="6">
+            </div>
+            
+            <div class="control-group">
+                <label for="lineWidth">Толщина контура:</label>
+                <input type="number" id="lineWidth" min="1" max="20" value="2">
+            </div>
+            
+            <div class="control-group">
+                <label for="strokeColor">Цвет контура:</label>
+                <input type="color" id="strokeColor" value="#0000ff">
+            </div>
+            
+            <div class="control-group">
+                <label for="fillColor">Цвет заливки:</label>
+                <input type="color" id="fillColor" value="#ff0000">
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="fillEnabled" checked>
+                <label for="fillEnabled">Включить заливку</label>
+            </div>
+        </div>
+        
+        <canvas id="polygonCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <script>
+        // Получаем элементы управления
+        const radiusInput = document.getElementById('radius');
+        const sidesInput = document.getElementById('sides');
+        const lineWidthInput = document.getElementById('lineWidth');
+        const strokeColorInput = document.getElementById('strokeColor');
+        const fillColorInput = document.getElementById('fillColor');
+        const fillEnabledInput = document.getElementById('fillEnabled');
+        const canvas = document.getElementById('polygonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Функция для рисования многоугольника
+        function drawPolygon() {
+            // Очищаем canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Получаем значения из элементов управления
+            const radius = parseInt(radiusInput.value);
+            const sides = parseInt(sidesInput.value);
+            const lineWidth = parseInt(lineWidthInput.value);
+            const strokeColor = strokeColorInput.value;
+            const fillColor = fillColorInput.value;
+            const fillEnabled = fillEnabledInput.checked;
+            
+            // Центр canvas
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Начинаем путь
+            ctx.beginPath();
+            
+            // Рассчитываем координаты вершин многоугольника
+            for (let i = 0; i < sides; i++) {
+                const angle = (i * 2 * Math.PI / sides) - Math.PI / 2; // Смещаем на 90 градусов чтобы первая вершина была сверху
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            // Замыкаем путь
+            ctx.closePath();
+            
+            // Устанавливаем стили
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = strokeColor;
+            
+            // Заливаем если включено
+            if (fillEnabled) {
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+            
+            // Рисуем контур
+            ctx.stroke();
+        }
+
+        // Добавляем обработчики событий
+        radiusInput.addEventListener('change', drawPolygon);
+        sidesInput.addEventListener('change', drawPolygon);
+        lineWidthInput.addEventListener('change', drawPolygon);
+        strokeColorInput.addEventListener('change', drawPolygon);
+        fillColorInput.addEventListener('change', drawPolygon);
+        fillEnabledInput.addEventListener('change', drawPolygon);
+
+        // Рисуем начальный многоугольник
+        drawPolygon();
+    </script>
+</body>
+</html>
